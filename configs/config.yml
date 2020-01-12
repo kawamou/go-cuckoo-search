@@ -1,0 +1,7 @@
+Ncuckoo: 10
+Nstep: 10
+Ndim: 2
+Parameters: 
+  - 1.0
+  - 1.0
+  - 1.0
