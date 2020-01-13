@@ -1,10 +1,19 @@
-package cs
+package main
 
-// ここにcase文でfuncを返す関数を記述
-func ()  {
-	switch expression {
-	case condition:
-		
+// ObjectiveFunc is xxx
+func ObjectiveFunc(name string) func([]float64) float64 {
+	switch name {
+	case "Ackley":
+		return ackley
+	default:
+		return ackley
 	}
-	
+}
+
+func ackley(X []float64) float64 {
+	var s1 float64
+	for _, x := range X {
+		s1 += x
+	}
+	return s1
 }

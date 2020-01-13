@@ -1,12 +1,12 @@
-package cs
+package main
 
 import (
 	"fmt"
 )
 
 func main() {
-	objectiveFunc := "Rastrigin"
-	solver := newSolver()
-	solver.Run(objectiveFunc)
-	fmt.Println(solver.getBest)
+	objectiveFunc := ObjectiveFunc("Ackley")
+	solver := NewSolver(objectiveFunc)
+	solver.Run()
+	fmt.Println(solver.bestFitness)
 }
