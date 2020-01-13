@@ -1,12 +1,17 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
+	"fmt"
 	"io/ioutil"
 	"gopkg.in/yaml.v2"
 )
+
+// TargetFunc is xxx
+type TargetFunc func([]float64) float64
+
+type swarm []*cuckoo
 
 // Solver is xxx
 type Solver struct {
@@ -16,13 +21,12 @@ type Solver struct {
 	bestFitness float64
 	Parameters []float64  `yaml:"Parameters"`
 	swarm      swarm
-	objectiveFunc func([]float64) float64
+	targetFunc TargetFunc
+	UpperLimit float64    `yaml:"UpperLimit"`
+	LowerLimit float64    `yaml:"LowerLimit"`
 }
 
-type swarm []*cuckoo
-
-// RandomVector is xxx
-func RandomVector(nDim int, upperLimit, lowerLimit float64) []float64 {
+func randomVector(nDim int, upperLimit, lowerLimit float64) []float64 {
 	rand.Seed(time.Now().UnixNano())
 	vector := make([]float64, nDim)
 	for i := range vector {
@@ -33,11 +37,12 @@ func RandomVector(nDim int, upperLimit, lowerLimit float64) []float64 {
 
 func(s *Solver) initSwarm() {
 	var min float64
-	swarm := make(swarm, s.Ndim)
+	swarm := make(swarm, s.Ncuckoo)
 
 	for i := range swarm {
-		pos := RandomVector(s.Ndim, 0, 1)
-		fitness := s.objectiveFunc(pos)
+		pos := randomVector(s.Ndim, s.UpperLimit, s.LowerLimit)
+		fmt.Println(pos)
+		fitness := s.targetFunc(pos)
 		swarm[i] = NewCuckoo(pos, fitness, s.Parameters[0], s.Parameters[1], s.Parameters[2])
 		if i == 0 {
 			min = fitness
@@ -52,36 +57,31 @@ func(s *Solver) initSwarm() {
 }
 
 // Step is xxx
-func(s *Solver) Step() {
+func(s *Solver) step() {
 	for i := range s.swarm {
-		s.swarm[i].move()
-		s.swarm[i].randomMove(s.bestFitness)
+		s.swarm[i].move(s.targetFunc)
+		s.swarm[i].randomMove(s.targetFunc, s.bestFitness)
 	}
-}
-
-func(s *Solver) evalFitness() {
-
 }
 
 // Run is xxx
 func(s *Solver) Run() {
 	s.initSwarm()
 	for i := 0; i < s.Nstep; i++ {
-		s.Step()
+		s.step()
 	}
 }
 
 // NewSolver is xxx
-func NewSolver(objectiveFunc func([]float64) float64) *Solver {
+func NewSolver(targetFunc TargetFunc) *Solver {
 	filepath := "./configs/config.yml"
 	buf, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		panic(err)
 	}
 	c := new(Solver)
-	fmt.Println(c)
 	err = yaml.Unmarshal(buf, &c)
+	c.targetFunc = targetFunc
 	fmt.Println(c)
-	c.objectiveFunc = objectiveFunc
 	return c
 }

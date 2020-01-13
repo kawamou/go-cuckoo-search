@@ -5,8 +5,8 @@ import (
 )
 
 func main() {
-	objectiveFunc := ObjectiveFunc("Ackley")
-	solver := NewSolver(objectiveFunc)
+	targetFunc := GetTargetFunc("Ackley")
+	solver := NewSolver(targetFunc)
 	solver.Run()
 	fmt.Println(solver.bestFitness)
 }
