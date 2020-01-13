@@ -1,9 +1,9 @@
 Ncuckoo: 10
-Nstep: 10
+Nstep: 1000
 Ndim: 2
-Parameters: 
-  - 1.0
-  - 1.0
-  - 1.0
+CuckooParam: 
+ Stepsize: 0.001
+ Beta: 1.5
+ Pa: 0.0
 UpperLimit: 1.0
 LowerLimit: 0.0

@@ -15,15 +15,24 @@ type swarm []*cuckoo
 
 // Solver is xxx
 type Solver struct {
-	Ncuckoo    int        `yaml:"Ncuckoo"`
-	Nstep      int        `yaml:"Nstep"`
-	Ndim       int        `yaml:"Ndim"`
+	Ncuckoo     int         `yaml:"Ncuckoo"`
+	Nstep       int         `yaml:"Nstep"`
+	Ndim        int         `yaml:"Ndim"`
 	bestFitness float64
-	Parameters []float64  `yaml:"Parameters"`
-	swarm      swarm
-	targetFunc TargetFunc
-	UpperLimit float64    `yaml:"UpperLimit"`
-	LowerLimit float64    `yaml:"LowerLimit"`
+	CuckooParam CuckooParam `yaml:"CuckooParam"`
+	swarm       swarm
+	targetFunc  TargetFunc
+	UpperLimit  float64     `yaml:"UpperLimit"`
+	LowerLimit  float64     `yaml:"LowerLimit"`
+}
+
+// CuckooParam is xxx
+type CuckooParam struct {
+	Stepsize float64 `yaml:"Stepsize"`
+	Beta     float64 `yaml:"Beta"`
+	Pa       float64 `yaml:"Pa"`
+	SigmaP   float64 
+	SigmaQ   float64 
 }
 
 func randomVector(nDim int, upperLimit, lowerLimit float64) []float64 {
@@ -41,9 +50,8 @@ func(s *Solver) initSwarm() {
 
 	for i := range swarm {
 		pos := randomVector(s.Ndim, s.UpperLimit, s.LowerLimit)
-		fmt.Println(pos)
 		fitness := s.targetFunc(pos)
-		swarm[i] = NewCuckoo(pos, fitness, s.Parameters[0], s.Parameters[1], s.Parameters[2])
+		swarm[i] = NewCuckoo(pos, fitness, s.CuckooParam)
 		if i == 0 {
 			min = fitness
 		} else {
@@ -59,8 +67,14 @@ func(s *Solver) initSwarm() {
 // Step is xxx
 func(s *Solver) step() {
 	for i := range s.swarm {
-		s.swarm[i].move(s.targetFunc)
-		s.swarm[i].randomMove(s.targetFunc, s.bestFitness)
+		fitness := s.swarm[i].move(s.targetFunc)
+		if fitness < s.bestFitness {
+			s.bestFitness = fitness
+		}
+		fitness = s.swarm[i].randomMove(s.targetFunc, s.bestFitness)
+		if fitness < s.bestFitness {
+			s.bestFitness = fitness
+		}
 	}
 }
 
@@ -69,6 +83,7 @@ func(s *Solver) Run() {
 	s.initSwarm()
 	for i := 0; i < s.Nstep; i++ {
 		s.step()
+		fmt.Println(s.bestFitness)
 	}
 }
 
