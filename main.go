@@ -1,10 +1,11 @@
 package main
 
 import (
+	"go-cuckoo-search/cso"
 )
 
 func main() {
-	targetFunc := GetTargetFunc("Ackley")
-	solver := NewSolver(targetFunc)
+	targetFunc := cso.GetTargetFunc("Ackley")
+	solver := cso.NewSolver(targetFunc)
 	solver.Run()
 }
